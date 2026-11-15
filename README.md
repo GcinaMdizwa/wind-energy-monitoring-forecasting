@@ -1,5 +1,49 @@
 # Wind Energy Monitoring and Forecasting
 
+## WindScope — local dashboard
+
+A local geospatial research dashboard by Gcina Mdizwa: welcome page, local sign-in, searchable study areas, modelled wind monitoring, illustrative turbine power estimates, saved projects and an RNN/LSTM forecast lab. This is new portfolio software with AI assistance, not the recovered CHPC implementation.
+
+### Start the dashboard
+
+Use Python 3.11 or 3.12 in a virtual environment:
+
+```bash
+git clone https://github.com/GcinaMdizwa/wind-energy-monitoring-forecasting.git
+cd wind-energy-monitoring-forecasting
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+python -m pip install -r requirements.txt
+python dashboard_server.py
+```
+
+Open **http://localhost:8765**. The server binds only to `127.0.0.1`. `Start_WindScope.bat` is a Windows shortcut after installing the requirements. Keep the server running while using the page. PyTorch is a substantial dependency; CPU is sufficient for the included experiment. Tests additionally require `httpx` for FastAPI's test client.
+
+1. Choose **Explore the dashboard** for a shared guest workspace, or create a separate local profile. Local profile names/passwords are separate from Google and GitHub; never enter those accounts' passwords here. Profile passwords are PBKDF2 hashed. Sessions expire after 12 hours and reset when the server restarts. This local research application is not a hardened multi-user internet service.
+2. Search a place or enter WGS84 coordinates, including coastal/offshore points. Adjust single-turbine capacity. The map shows the selected point; the weather service can return a nearby grid point.
+3. Review wind, direction, illustrative power and 24-hour estimated energy. Switch the chart between wind and power, and hover for values. Times are UTC. Weather refreshes every ten minutes while Overview is open; upstream results are cached for ten minutes. Failed requests show an error, never synthetic replacement data.
+4. **Save as project**, then open **Forecast lab**. Select RNN, LSTM or the hybrid, 1/2/3/5 years of hourly history and the epoch budget. Training runs locally in the background, one job at a time. The UI reports progress and held-out MAE/RMSE against persistence. Models need not outperform the baseline.
+5. **Run forecast** uses the latest 48 completed hourly weather values and predicts 24 future wind speeds. The model is project-specific. A 24-hour power/energy estimate is derived from its wind prediction. Historical validation and the new forecast are separate panels.
+
+### What the dashboard measures (and does not)
+
+- Monitoring: [Open-Meteo Forecast API](https://open-meteo.com/en/docs) numerical weather output, hourly wind at **100 m**, not anemometer/buoy/SCADA telemetry. The separately returned current 10 m reading is not mixed into 100 m charts.
+- Training: [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api), explicitly **ERA5** hourly reanalysis at 100 m. The archive window ends seven days before retrieval. Place search uses [GeoNames via Open-Meteo](https://open-meteo.com/en/docs/geocoding-api). Map © OpenStreetMap contributors. Data attribution: Open-Meteo / ERA5, CC BY 4.0. Free public API use is subject to non-commercial usage terms and rate limits; commercial deployment needs an appropriate plan.
+- Power: **illustrative cubic curve**, cut-in 3 m/s, rated 12 m/s, cut-out 25 m/s, adjustable 1–20,000 kW capacity. Zero output at/above cut-out. No calibrated manufacturer curve, air-density correction, wakes, losses or availability. Energy sums 24 hourly estimated kW values × one hour and converts to MWh. These are not measured outputs or bankable yield estimates.
+- Model: parallel `nn.RNN` and `nn.LSTM` encoders joined to a dense head. Alternatives use a single RNN or LSTM. Inputs: 48 hours of wind speed, circular wind direction, hour and day-of-year; direct 24-hour wind-speed target. Seasonal features and multi-year data expose seasonal behaviour, but cannot guarantee learning or future skill.
+- Validation: chronological 70/15/15 train/validation/test target periods. Windows crossing target-period boundaries are excluded. Scaler statistics use only the training period. Early stopping selects the best validation weights. MAE/RMSE compare identical rolling test origins/horizons with persistence. Overlapping windows are correlated. One holdout is not multi-season walk-forward validation.
+- Forecast transfer: the ERA5-trained model consumes current forecast-provider weather estimates; this distribution shift is **not calibrated**. No measured-power training target, sea-state inputs, uncertainty bands or automatic online learning is implemented. Retraining is explicit. Measured mast/buoy/SCADA data and proper walk-forward tests are required before operational coastal power forecasting.
+- Privacy: local profiles, projects, model checkpoints and reports are stored in ignored `local_state/`. Searches and coordinates go to public weather/geocoding/map providers. No personal/company datasets or credentials are published. Do not expose this development server to the internet.
+
+```bash
+python -m unittest test_dashboard test_wind_forecast -v
+```
+
+New dashboard files: `dashboard_server.py`, `wind_data.py`, `recurrent_forecast.py`, `dashboard.html`, `dashboard.css`, `dashboard.js`, `test_dashboard.py`, `Start_WindScope.bat`. The original educational Random Forest example below remains separate.
+
+---
+
 Repository preparation for Gcina Mdizwa's personal geospatial portfolio, documenting collaborative CHPC workshop work on wind-energy monitoring and forecasting.
 
 **Status:** a new educational Python baseline for short-term turbine-power forecasting. It is not the original CHPC implementation or an operational near-real-time system. The included demo uses synthetic data; it does not reproduce a CHPC scientific result.

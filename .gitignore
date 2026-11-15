@@ -10,3 +10,7 @@ data/private/
 models/private/
 outputs/
 *.joblib
+local_state/
+*.sqlite*
+*.pt
+*.log

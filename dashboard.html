@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>WindScope — Wind intelligence, in view</title>
+    <link rel="stylesheet" href="/dashboard.css" />
+    <script src="/dashboard.js" defer></script>
+  </head>
+  <body>
+    <svg class="svg-defs" aria-hidden="true">
+      <defs>
+        <symbol id="turbine" viewBox="0 0 180 300">
+          <path d="M85 132L78 298H102L95 132Z" fill="currentColor" />
+          <g class="rotor">
+            <path d="M90 127L86 15Q89 0 94 15L99 116Z" fill="currentColor" />
+            <path
+              d="M90 127L86 15Q89 0 94 15L99 116Z"
+              fill="currentColor"
+              transform="rotate(120 90 127)"
+            />
+            <path
+              d="M90 127L86 15Q89 0 94 15L99 116Z"
+              fill="currentColor"
+              transform="rotate(240 90 127)"
+            />
+            <circle cx="90" cy="127" r="8" fill="currentColor" />
+          </g>
+        </symbol>
+      </defs>
+    </svg>
+    <section id="welcome">
+      <header class="landing-header">
+        <a class="brand" href="/"
+          >◈ <span>WindScope<span class="brand-dot">.</span></span></a
+        ><span class="landing-tag">A GEOSPATIAL RESEARCH WORKSPACE</span
+        ><button class="button outline" id="open-login">
+          Sign in <span>↗</span>
+        </button>
+      </header>
+      <main class="landing-main">
+        <div class="hero-copy">
+          <span class="eyebrow"
+            ><span class="dot"></span> FROM ATMOSPHERE TO INSIGHT</span
+          >
+          <h1>See the wind.<br />Understand<br />its <em>potential.</em></h1>
+          <p>
+            Explore your study area. Follow changing winds.<br />Turn years of
+            weather into your next forecast.
+          </p>
+          <div class="hero-actions">
+            <button id="explore" class="button primary">
+              Explore the dashboard <span>↗</span></button
+            ><button id="open-register" class="button text-button">
+              Create local profile →
+            </button>
+          </div>
+          <div class="hero-footnote">
+            <span>01 / MONITOR</span><span>02 / FORECAST</span
+            ><span>03 / EXPLORE</span>
+          </div>
+        </div>
+        <div
+          class="wind-scene"
+          aria-label="Illustration of a coastal wind farm"
+        >
+          <div class="scene-grid"></div>
+          <div class="scene-coordinate">
+            34°02′ S &nbsp; 24°55′ E<br /><span
+              >EASTERN CAPE · SOUTH AFRICA</span
+            >
+          </div>
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <svg class="turbine t-one"><use href="#turbine" /></svg
+          ><svg class="turbine t-two"><use href="#turbine" /></svg
+          ><svg class="turbine t-three"><use href="#turbine" /></svg>
+          <div class="terrain terrain-back"></div>
+          <div class="terrain terrain-front"></div>
+          <div class="scene-card">
+            <span class="dot"></span> BUILT FOR A CHANGING WORLD
+            <b>Wind. Data. Possibility.</b
+            ><small>Weather intelligence × recurrent learning</small>
+          </div>
+          <div class="scene-index">W / 01</div>
+        </div>
+      </main>
+      <footer class="landing-footer">
+        <span>GCINA MDIZWA &nbsp; / &nbsp; WIND ENERGY RESEARCH</span
+        ><span>Public weather data. Clearly defined estimates.</span
+        ><span>LOCAL EDITION · 2026</span>
+      </footer>
+    </section>
+    <div id="auth-modal" class="modal-backdrop" hidden>
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-title"
+      >
+        <button class="close" id="close-auth" aria-label="Close sign in">
+          ×
+        </button>
+        <div class="mini-mark">◈</div>
+        <span class="eyebrow">YOUR RESEARCH, IN ONE PLACE</span>
+        <h2 id="auth-title">Welcome back.</h2>
+        <p id="auth-subtitle">Sign in to your local research profile.</p>
+        <form id="auth-form">
+          <label
+            >Profile name<input
+              id="auth-name"
+              autocomplete="username"
+              minlength="2"
+              maxlength="60"
+              required
+              placeholder="Your name" /></label
+          ><label
+            >Password<input
+              id="auth-password"
+              type="password"
+              autocomplete="current-password"
+              minlength="10"
+              maxlength="128"
+              required
+              placeholder="At least 10 characters"
+          /></label>
+          <p id="auth-error" class="error" role="alert"></p>
+          <button class="button primary full" type="submit" id="auth-submit">
+            Sign in →
+          </button>
+        </form>
+        <button id="switch-auth" class="button text-button full">
+          New here? Create a local profile</button
+        ><small class="muted"
+          >Stored on this computer. This is separate from GitHub or Google.
+          Guest mode uses a shared local workspace.</small
+        >
+      </section>
+    </div>
+    <div id="workspace" hidden>
+      <aside class="sidebar">
+        <a class="brand light" href="/"
+          >◈ <span>WindScope<span class="brand-dot">.</span></span></a
+        >
+        <div class="workspace-label">RESEARCH WORKSPACE</div>
+        <nav aria-label="Main navigation">
+          <button class="nav-item active" data-view="overview">
+            <span>▦</span> Overview</button
+          ><button class="nav-item" data-view="forecast">
+            <span>⌁</span> Forecast lab</button
+          ><button class="nav-item" data-view="projects">
+            <span>▱</span> My projects <b id="project-count">0</b></button
+          ><button class="nav-item" data-view="methods">
+            <span>◎</span> Data & methods
+          </button>
+        </nav>
+        <div class="sidebar-note">
+          <span class="dot"></span> LOCAL RESEARCH EDITION
+          <p>Explore carefully.<br />Forecast transparently.</p>
+          <small>Weather models are not<br />turbine measurements.</small>
+        </div>
+        <div class="sidebar-user">
+          <div class="avatar">GM</div>
+          <div>
+            <b id="profile-name">Research guest</b
+            ><small>Personal workspace</small>
+          </div>
+          <button id="logout" aria-label="Sign out" title="Sign out">↪</button>
+        </div>
+      </aside>
+      <div class="main-shell">
+        <header class="topbar">
+          <div class="breadcrumb">
+            Workspace <span>/</span> <b id="breadcrumb-view">Overview</b>
+          </div>
+          <div class="top-right">
+            <span class="local-chip"
+              ><span class="dot"></span> Local session</span
+            ><span id="today"></span>
+          </div>
+        </header>
+        <main class="dashboard-main">
+          <div id="global-error" class="notice error" role="alert" hidden></div>
+          <section id="view-overview" class="view">
+            <div class="page-heading">
+              <div>
+                <span class="eyebrow">YOUR WIND INTELLIGENCE, IN VIEW</span>
+                <h1>Wind overview<span class="title-dot">.</span></h1>
+                <p>A closer look at the atmosphere above your study area.</p>
+              </div>
+              <button class="button dark" id="save-current">
+                ＋ Save as project
+              </button>
+            </div>
+            <div class="location-toolbar">
+              <div class="search-box">
+                <span>⌕</span>
+                <form id="location-form">
+                  <label class="sr-only" for="place-query"
+                    >Search study area</label
+                  ><input
+                    id="place-query"
+                    placeholder="Search a city or study area…"
+                    autocomplete="off"
+                  /><button class="button small" type="submit">
+                    Search ↗
+                  </button>
+                </form>
+                <div id="search-results" class="search-results" hidden></div>
+              </div>
+              <button id="coordinate-toggle" class="button outline">
+                ⌖ Coordinates</button
+              ><label class="capacity-label"
+                >Turbine capacity<select id="capacity">
+                  <option value="1000">1 MW</option>
+                  <option value="2000" selected>2 MW</option>
+                  <option value="3000">3 MW</option>
+                  <option value="5000">5 MW</option>
+                  <option value="10000">10 MW</option>
+                </select></label
+              ><button
+                id="refresh-weather"
+                class="icon-button"
+                aria-label="Refresh weather"
+                title="Refresh weather"
+              >
+                ⟳
+              </button>
+            </div>
+            <form id="coordinates-form" class="coordinate-form" hidden>
+              <label
+                >Latitude<input
+                  id="latitude"
+                  type="number"
+                  step="any"
+                  min="-90"
+                  max="90"
+                  required
+                  value="-34.05" /></label
+              ><label
+                >Longitude<input
+                  id="longitude"
+                  type="number"
+                  step="any"
+                  min="-180"
+                  max="180"
+                  required
+                  value="24.92" /></label
+              ><button class="button primary small" type="submit">
+                Monitor location →</button
+              ><span
+                >WGS84 decimal degrees · coastal and offshore points
+                supported</span
+              >
+            </form>
+            <div class="location-line">
+              <div>
+                <span class="pin">⌖</span>
+                <b id="location-name">Jeffreys Bay, South Africa</b
+                ><span id="location-coords">−34.0500, 24.9200</span>
+              </div>
+              <span id="weather-status" class="status-chip"
+                >Connecting to weather…</span
+              >
+            </div>
+            <div class="metrics">
+              <article class="metric">
+                <div class="metric-top">WIND SPEED <span>≋</span></div>
+                <div class="metric-value">
+                  <b id="wind-value">—</b><span>m/s</span>
+                </div>
+                <p>100 m · modelled hourly wind</p>
+                <div class="metric-mini mint" id="wind-mini"></div>
+              </article>
+              <article class="metric">
+                <div class="metric-top">ESTIMATED POWER <span>ϟ</span></div>
+                <div class="metric-value">
+                  <b id="power-value">—</b><span>kW</span>
+                </div>
+                <p>Illustrative curve · one turbine</p>
+                <div class="capacity-track"><i id="capacity-fill"></i></div>
+              </article>
+              <article class="metric">
+                <div class="metric-top">WIND DIRECTION <span>↗</span></div>
+                <div class="metric-value">
+                  <b id="direction-value">—</b
+                  ><span id="direction-cardinal">°</span>
+                </div>
+                <p>100 m · meteorological direction</p>
+                <div class="metric-detail">Direction the wind comes from</div>
+              </article>
+              <article class="metric">
+                <div class="metric-top">NEXT 24H ENERGY <span>◷</span></div>
+                <div class="metric-value">
+                  <b id="energy-value">—</b><span>MWh</span>
+                </div>
+                <p>Estimated · not metered production</p>
+                <div class="metric-detail">Hourly power × 1 hour, summed</div>
+              </article>
+            </div>
+            <div class="overview-grid">
+              <article class="panel trend-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h2>Wind & power outlook</h2>
+                    <p>Recent modelled weather and the next 48 hours</p>
+                  </div>
+                  <div class="segmented" aria-label="Chart variable">
+                    <button class="selected" data-chart="speed">Wind</button
+                    ><button data-chart="power_kw">Power</button>
+                  </div>
+                </div>
+                <div class="chart-legend">
+                  <span class="legend-key green"></span> Weather model
+                  <span class="legend-key dotted"></span> Forecast period
+                  <span class="chart-unit" id="chart-unit">m/s · UTC</span>
+                </div>
+                <div
+                  id="main-chart"
+                  class="chart large-chart"
+                  aria-label="Wind and power timeseries"
+                ></div>
+                <div class="panel-bottom">
+                  <span
+                    >↗
+                    <span id="chart-insight"
+                      >Select a study area to explore its wind profile.</span
+                    ></span
+                  ><small>Open-Meteo · UTC</small>
+                </div>
+              </article>
+              <article class="panel map-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h2>Study area</h2>
+                    <p id="map-coords">34.0500° S · 24.9200° E</p>
+                  </div>
+                  <span class="map-tag">WGS84</span>
+                </div>
+                <iframe
+                  id="area-map"
+                  title="Study area map from OpenStreetMap"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                ></iframe>
+                <div class="map-bottom">
+                  <span><span class="dot"></span> Selected point</span
+                  ><a id="open-map" target="_blank" rel="noopener"
+                    >Open map ↗</a
+                  >
+                </div>
+              </article>
+              <article class="panel direction-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h2>Wind distribution</h2>
+                    <p>Modelled hours by direction · displayed window</p>
+                  </div>
+                  <span class="map-tag">8 SECTORS</span>
+                </div>
+                <div id="wind-rose" class="rose"></div>
+              </article>
+              <article class="forecast-callout">
+                <div class="callout-icon">⌁</div>
+                <span class="eyebrow">GO BEYOND THE NEXT HOUR</span>
+                <h2>Let the past inform<br />what comes next.</h2>
+                <p>
+                  Train an RNN, LSTM or hybrid on up to five years of hourly
+                  history. Compare its forecasts with a simple baseline.
+                </p>
+                <button class="button dark" data-view="forecast">
+                  Open the forecast lab <span>↗</span></button
+                ><small
+                  >No neural forecast is shown until a model is trained.</small
+                >
+              </article>
+            </div>
+            <div class="source-note">
+              <span>ⓘ</span>
+              <p id="source-note">
+                Public numerical weather data refreshes every 10 minutes while
+                this page is open. Power estimates use an illustrative curve,
+                without turbine losses or site calibration.
+              </p>
+            </div>
+          </section>
+          <section id="view-forecast" class="view" hidden>
+            <div class="page-heading">
+              <div>
+                <span class="eyebrow">FROM HISTORY TO HORIZON</span>
+                <h1>Forecast lab<span class="title-dot">.</span></h1>
+                <p>
+                  Train, evaluate and compare recurrent models for a saved study
+                  area.
+                </p>
+              </div>
+              <span class="status-chip">CPU training · local</span>
+            </div>
+            <div class="lab-grid">
+              <article class="panel lab-config">
+                <span class="step-number">01 / CONFIGURE</span>
+                <h2>Build your experiment</h2>
+                <label
+                  >Study area project<select id="training-project">
+                    <option value="">Save a study area first</option>
+                  </select></label
+                ><label
+                  >Architecture<select id="architecture">
+                    <option value="hybrid">Hybrid RNN + LSTM</option>
+                    <option value="lstm">LSTM</option>
+                    <option value="rnn">Vanilla RNN</option>
+                  </select></label
+                ><label
+                  >ERA5 historical data<select id="history-years">
+                    <option value="1">1 year · hourly</option>
+                    <option value="2">2 years · hourly</option>
+                    <option value="3">3 years · hourly</option>
+                    <option value="5">5 years · hourly</option>
+                  </select></label
+                ><label
+                  >Maximum epochs<select id="epochs">
+                    <option value="4">4 · quick experiment</option>
+                    <option value="12" selected>12 · standard</option>
+                    <option value="24">24 · extended</option>
+                    <option value="40">40 · extended</option>
+                  </select></label
+                >
+                <div class="config-detail">
+                  <span>Input window<b>48 hours</b></span
+                  ><span>Forecast horizon<b>24 hours</b></span
+                  ><span>Target<b>Wind speed · m/s</b></span
+                  ><span>Split<b>70 / 15 / 15</b></span>
+                </div>
+                <button class="button primary full" id="train">
+                  Start training <span>↗</span>
+                </button>
+                <p class="muted small-text">
+                  The history window ends 7 days ago. Training may take several
+                  minutes. Retrain explicitly as new history becomes available.
+                </p>
+              </article>
+              <div>
+                <article class="panel training-state">
+                  <div class="panel-heading">
+                    <div>
+                      <span class="step-number">02 / LEARN & VALIDATE</span>
+                      <h2 id="training-title">Ready when you are.</h2>
+                    </div>
+                    <span class="model-badge">RNN × LSTM</span>
+                  </div>
+                  <p id="training-description">
+                    Save a project, then start an experiment. Results are
+                    evaluated on later data the model has not trained on.
+                  </p>
+                  <div class="training-progress">
+                    <i id="training-progress"></i>
+                  </div>
+                  <div class="evaluation-grid">
+                    <div>
+                      <small>MODEL MAE</small><strong id="model-mae">—</strong
+                      ><span>m/s · all 24 horizons</span>
+                    </div>
+                    <div>
+                      <small>PERSISTENCE MAE</small
+                      ><strong id="baseline-mae">—</strong
+                      ><span>m/s · same test periods</span>
+                    </div>
+                    <div>
+                      <small>TEST WINDOWS</small
+                      ><strong id="test-count">—</strong
+                      ><span>rolling issue times</span>
+                    </div>
+                  </div>
+                  <div id="training-chart" class="chart lab-chart"></div>
+                  <p id="model-summary" class="muted small-text">
+                    No model trained for this project.
+                  </p>
+                </article>
+                <article class="panel neural-panel">
+                  <div class="panel-heading">
+                    <div>
+                      <span class="step-number">03 / FORECAST</span>
+                      <h2>Next 24 hours</h2>
+                      <p>
+                        Your trained model, driven by the latest available
+                        weather.
+                      </p>
+                    </div>
+                    <button
+                      class="button outline small"
+                      id="run-prediction"
+                      disabled
+                    >
+                      Run forecast ↗
+                    </button>
+                  </div>
+                  <div id="neural-chart" class="chart lab-chart">
+                    <div class="empty-state">
+                      Your trained forecast will appear here.
+                    </div>
+                  </div>
+                  <p id="neural-note" class="muted small-text">
+                    Neural wind-speed forecast. Estimated power is calculated
+                    separately using the illustrative turbine curve.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </section>
+          <section id="view-projects" class="view" hidden>
+            <div class="page-heading">
+              <div>
+                <span class="eyebrow">A PLACE FOR EVERY QUESTION</span>
+                <h1>My projects<span class="title-dot">.</span></h1>
+                <p>Your saved study areas and their forecasting experiments.</p>
+              </div>
+              <button class="button dark" data-view="overview">
+                ＋ Explore a study area
+              </button>
+            </div>
+            <div id="projects-list" class="projects-grid"></div>
+          </section>
+          <section id="view-methods" class="view" hidden>
+            <div class="page-heading">
+              <div>
+                <span class="eyebrow">KNOW WHAT IS BEHIND THE NUMBERS</span>
+                <h1>Data & methods<span class="title-dot">.</span></h1>
+                <p>Clear sources. Reproducible experiments. Honest limits.</p>
+              </div>
+            </div>
+            <div class="methods-grid">
+              <article class="panel">
+                <span class="step-number">01 / MONITORING</span>
+                <h2>Weather, not telemetry</h2>
+                <p>
+                  Open-Meteo provides numerical weather estimates at the
+                  selected grid point. Charts use hourly wind at 100 m; the
+                  current 10 m weather reading is a separate variable and is not
+                  mixed with those charts. Refreshes are cached for 10 minutes.
+                  The map shows the requested point, while the weather provider
+                  may return a nearby grid cell.
+                </p>
+                <a
+                  href="https://open-meteo.com/en/docs"
+                  target="_blank"
+                  rel="noopener"
+                  >Forecast API documentation ↗</a
+                >
+              </article>
+              <article class="panel">
+                <span class="step-number">02 / ESTIMATION</span>
+                <h2>Power has assumptions</h2>
+                <p>
+                  Single-turbine illustrative cubic curve: cut-in 3 m/s, rated
+                  speed 12 m/s, cut-out 25 m/s. Rated capacity is adjustable. No
+                  air-density correction, wakes, outages, electrical losses or
+                  actual manufacturer curve. Energy sums hourly estimated power
+                  × one hour. These estimates are not bankable energy-yield
+                  assessments.
+                </p>
+              </article>
+              <article class="panel">
+                <span class="step-number">03 / LEARNING</span>
+                <h2>RNN × LSTM</h2>
+                <p>
+                  The hybrid combines parallel vanilla-RNN and LSTM encoders
+                  with a dense prediction head. Inputs are 48 hours of wind
+                  speed, circular wind direction, hour and day-of-year. It
+                  directly predicts 24 future hourly wind speeds. Single RNN and
+                  LSTM alternatives are available. Longer training history adds
+                  seasonal examples; it does not guarantee skill.
+                </p>
+              </article>
+              <article class="panel">
+                <span class="step-number">04 / VALIDATION</span>
+                <h2>Future data stays in the future</h2>
+                <p>
+                  Chronological 70% training, 15% validation and 15% test target
+                  periods. Scaling is fit only on training data. Early stopping
+                  uses validation loss. Reported MAE and RMSE compare the
+                  selected model with persistence across the same rolling test
+                  windows. Overlapping windows are correlated; one site's
+                  holdout is not proof of generalisation.
+                </p>
+              </article>
+              <article class="panel">
+                <span class="step-number">05 / COASTAL RESEARCH</span>
+                <h2>Learning the coastal wind</h2>
+                <p>
+                  Up to five years of ERA5 reanalysis can be retrieved at a
+                  selected land or offshore point. This version learns
+                  atmospheric wind, not waves, tides or sea-state dynamics.
+                  Coastal grid resolution and transfer from historical
+                  reanalysis to current forecast weather can introduce bias.
+                  Measured mast, buoy or turbine SCADA data and walk-forward
+                  validation are needed for operational use. Retraining is
+                  manual.
+                </p>
+                <a
+                  href="https://open-meteo.com/en/docs/historical-weather-api"
+                  target="_blank"
+                  rel="noopener"
+                  >ERA5 archive documentation ↗</a
+                >
+              </article>
+              <article class="panel">
+                <span class="step-number">06 / COLLABORATIVE CONTEXT</span>
+                <h2>Acknowledging the team</h2>
+                <p>
+                  CHPC workshop context: Onesimo Madikizela, Aphelele
+                  Khalakahla, Sange Mfamana, Phila Sibandze, Kgabo Humphrey
+                  Thamaga, Nomaxabiso Ngogodo, Gcina Mdizwa, Sinethemba Funani
+                  and Gbenga Abayomi Afuye. This dashboard is new portfolio work
+                  with AI assistance; it is not a reproduction of the original
+                  workshop implementation.
+                </p>
+                <a
+                  href="https://events.chpc.ac.za/event/155/contributions/2684/"
+                  target="_blank"
+                  rel="noopener"
+                  >CHPC author record ↗</a
+                >
+              </article>
+            </div>
+            <p class="source-note">
+              Weather: Open-Meteo / ERA5, CC BY 4.0 attribution. Location
+              search: GeoNames via Open-Meteo. Map: © OpenStreetMap
+              contributors. Public API usage is subject to provider limits and
+              non-commercial terms. Local profiles and models remain on this
+              computer; place searches and coordinates are sent to the named
+              public providers.
+            </p>
+          </section>
+          <footer class="dashboard-footer">
+            <span>WINDSCOPE / RESEARCH EDITION</span
+            ><span>Gcina Mdizwa · Geospatial intelligence</span
+            ><span>All chart times in UTC</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+    <div id="save-modal" class="modal-backdrop" hidden>
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="save-title"
+      >
+        <button class="close" id="close-save" aria-label="Close save project">
+          ×</button
+        ><span class="eyebrow">KEEP YOUR STUDY AREA</span>
+        <h2 id="save-title">Start a new project.</h2>
+        <form id="save-form">
+          <label
+            >Project name<input
+              id="project-name"
+              minlength="2"
+              maxlength="100"
+              required
+              placeholder="e.g. Eastern Cape coastal wind"
+          /></label>
+          <p id="save-location" class="muted"></p>
+          <button class="button primary full" type="submit">
+            Save project →
+          </button>
+        </form>
+        <p class="muted small-text">
+          Saves coordinates and turbine capacity locally. You can train a
+          separate model for each project.
+        </p>
+      </section>
+    </div>
+    <div id="toast" role="status" hidden></div>
+  </body>
+</html>
