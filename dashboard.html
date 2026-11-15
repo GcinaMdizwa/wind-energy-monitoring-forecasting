@@ -4,8 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>WindScope — Wind intelligence, in view</title>
+    <link rel="stylesheet" href="/leaflet.css" />
     <link rel="stylesheet" href="/dashboard.css" />
+    <script src="/leaflet.js" defer></script>
     <script src="/dashboard.js" defer></script>
+    <script src="/spatial_map.js" defer></script>
   </head>
   <body>
     <svg class="svg-defs" aria-hidden="true">
@@ -375,6 +378,112 @@
                 >
               </article>
             </div>
+            <article class="panel spatial-panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="step-number"
+                    >A WIDER VIEW OF YOUR STUDY AREA</span
+                  >
+                  <h2>Spatial wind-power potential</h2>
+                  <p>
+                    Compare an identical illustrative turbine at sampled
+                    locations within an administrative boundary.
+                  </p>
+                </div>
+                <button
+                  id="download-spatial"
+                  class="button outline small"
+                  disabled
+                >
+                  Download GeoJSON ↗
+                </button>
+              </div>
+              <div class="spatial-toolbar">
+                <label
+                  >Containing area<select id="boundary-level">
+                    <option value="municipality">Municipality</option>
+                    <option value="province">Province</option>
+                  </select></label
+                >
+                <label
+                  >Weather valid time<select id="spatial-hour">
+                    <option value="0">Current modelled hour</option>
+                    <option value="6">6 hours ahead</option>
+                    <option value="12">12 hours ahead</option>
+                    <option value="24">24 hours ahead</option>
+                  </select></label
+                >
+                <button class="button dark small" id="refresh-spatial">
+                  Update area map ↗
+                </button>
+                <span id="spatial-status" role="status"
+                  >Identifying the containing boundary…</span
+                >
+              </div>
+              <div class="spatial-area-line">
+                <h3 id="spatial-area-name">Selected administrative area</h3>
+                <span id="spatial-time"
+                  >All samples use one common UTC timestamp.</span
+                >
+              </div>
+              <div class="spatial-summary">
+                <div>
+                  <span>SAMPLE MEAN</span><b id="spatial-mean">—</b
+                  ><small>kW per illustrative turbine</small>
+                </div>
+                <div>
+                  <span>SAMPLE RANGE</span><b id="spatial-range">—</b
+                  ><small>kW per illustrative turbine</small>
+                </div>
+                <div>
+                  <span>VALID POINTS</span><b id="spatial-count">—</b
+                  ><small id="spatial-grid-count">weather-grid points</small>
+                </div>
+                <div>
+                  <span>SAMPLE SPACING</span><b id="spatial-spacing">—</b
+                  ><small>km in an equal-area projection</small>
+                </div>
+              </div>
+              <div
+                id="spatial-map"
+                role="region"
+                aria-label="Administrative area and sampled wind-power potential map"
+              ></div>
+              <div class="spatial-legend">
+                <span>Estimated output / rated turbine capacity</span
+                ><i class="scale-low"></i><span>0%</span
+                ><i class="scale-mid"></i><span>50%</span
+                ><i class="scale-high"></i><span>100%</span
+                ><small
+                  >Circles show point estimates; no interpolation between
+                  points.</small
+                >
+              </div>
+              <p id="spatial-note" class="muted small-text">
+                Identical hypothetical turbines at each point. Values are not
+                installed generation, electricity supply or a
+                municipal/provincial power total. Ward-level mapping is not
+                included in this version.
+              </p>
+              <details class="sample-details">
+                <summary>Inspect sampled locations and data sources</summary>
+                <div class="sample-table-wrap">
+                  <table class="sample-table">
+                    <thead>
+                      <tr>
+                        <th>Point</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Wind (m/s)</th>
+                        <th>Estimate (kW)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="spatial-table"></tbody>
+                  </table>
+                </div>
+                <p id="spatial-provenance" class="muted small-text"></p>
+              </details>
+            </article>
             <div class="source-note">
               <span>ⓘ</span>
               <p id="source-note">

@@ -16,6 +16,7 @@ from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 
 import wind_data
+import spatial_power
 
 ROOT = Path(__file__).resolve().parent
 STATE = Path(os.environ.get('WINDSCOPE_STATE', ROOT/'local_state'))
@@ -54,7 +55,7 @@ async def local_boundary(request: Request, call_next):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     response.headers['Cache-Control'] = 'no-store'
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-src https://www.openstreetmap.org; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; frame-src https://www.openstreetmap.org; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     return response
 
 
@@ -93,6 +94,33 @@ def css():
 @app.get('/dashboard.js')
 def js():
     return FileResponse(ROOT/'dashboard.js')
+
+
+@app.get('/leaflet.js')
+def leaflet_js():
+    return FileResponse(ROOT/'leaflet.js')
+
+
+@app.get('/leaflet.css')
+def leaflet_css():
+    return FileResponse(ROOT/'leaflet.css')
+
+
+@app.get('/spatial_map.js')
+def spatial_js():
+    return FileResponse(ROOT/'spatial_map.js')
+
+
+@app.get('/api/spatial-power')
+def spatial_distribution(request: Request, lat: float, lon: float, level: str = 'municipality',
+                         rated_kw: float = 2000, ahead: int = 0):
+    user(request)
+    try:
+        return spatial_power.distribution(lat, lon, level, rated_kw, ahead)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except Exception:
+        raise HTTPException(502, 'Boundary or weather service unavailable. Please retry; no substitute boundary or synthetic surface is used.')
 
 
 @app.get('/api/session')

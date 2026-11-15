@@ -23,6 +23,7 @@ Open **http://localhost:8765**. The server binds only to `127.0.0.1`. `Start_Win
 1. Choose **Explore the dashboard** for a shared guest workspace, or create a separate local profile. Local profile names/passwords are separate from Google and GitHub; never enter those accounts' passwords here. Profile passwords are PBKDF2 hashed. Sessions expire after 12 hours and reset when the server restarts. This local research application is not a hardened multi-user internet service.
 2. Search a place or enter WGS84 coordinates, including coastal/offshore points. Adjust single-turbine capacity. The map shows the selected point; the weather service can return a nearby grid point.
 3. Review wind, direction, illustrative power and 24-hour estimated energy. Switch the chart between wind and power, and hover for values. Times are UTC. Weather refreshes every ten minutes while Overview is open; upstream results are cached for ten minutes. Failed requests show an error, never synthetic replacement data.
+   The **Spatial wind-power potential** panel identifies the municipality or province containing the searched point. Change the area level or the common valid hour (now / +6 / +12 / +24 h), inspect coloured sample points and download boundary plus samples as GeoJSON.
 4. **Save as project**, then open **Forecast lab**. Select RNN, LSTM or the hybrid, 1/2/3/5 years of hourly history and the epoch budget. Training runs locally in the background, one job at a time. The UI reports progress and held-out MAE/RMSE against persistence. Models need not outperform the baseline.
 5. **Run forecast** uses the latest 48 completed hourly weather values and predicts 24 future wind speeds. The model is project-specific. A 24-hour power/energy estimate is derived from its wind prediction. Historical validation and the new forecast are separate panels.
 
@@ -37,10 +38,20 @@ Open **http://localhost:8765**. The server binds only to `127.0.0.1`. `Start_Win
 - Privacy: local profiles, projects, model checkpoints and reports are stored in ignored `local_state/`. Searches and coordinates go to public weather/geocoding/map providers. No personal/company datasets or credentials are published. Do not expose this development server to the internet.
 
 ```bash
-python -m unittest test_dashboard test_wind_forecast -v
+python -m unittest test_dashboard test_wind_forecast test_spatial_power -v
 ```
 
 New dashboard files: `dashboard_server.py`, `wind_data.py`, `recurrent_forecast.py`, `dashboard.html`, `dashboard.css`, `dashboard.js`, `test_dashboard.py`, `Start_WindScope.bat`. The original educational Random Forest example below remains separate.
+
+### Municipality / province spatial view
+
+`spatial_power.py` queries the [NDMC SouthAfricaBoundaries service](https://gislive21.ndmc.gov.za/hosting/rest/services/SouthAfricaBoundaries/MapServer), which credits the Municipal Demarcation Board. A point-in-polygon query identifies a containing local municipality (layer 2) or province (layer 0). The service does not specify the boundary vintage; these are **not verified as 2026 demarcations**. Ward-level mapping is not implemented. Offshore points outside these administrative boundaries return a clear no-boundary message.
+
+The map uses up to 25 centres of a 5×5 regular grid in **EPSG:6933 equal-area coordinates**, clipped to the served polygon, including holes/multipart geometry. Display/analysis geometry is simplified by the service with a maximum offset of 0.001°. Very narrow polygons use an interior representative point if no grid centres fall inside. Map and export report sample spacing. This is a coarse research sampling scheme, not a high-resolution wind resource assessment.
+
+A batch Open-Meteo request retrieves **100 m hourly wind at every sample**. Every coloured point is evaluated at one common UTC valid time. The same selected turbine capacity and illustrative curve are used everywhere. Points can share a coarse weather-model grid; the unique grid count is shown. Missing samples are omitted and counted explicitly. No interpolated raster, measured generation, installed capacity, electricity flows or municipal aggregate is claimed. The sample mean/range describes the queried points, not an area-weighted energy yield; **do not sum hypothetical turbines into a municipal total**. The spatial view uses numerical weather, not the point-specific neural model.
+
+Mapping UI: `spatial_map.js`; geometry/sampling tests: `test_spatial_power.py`. [Leaflet 1.9.4](https://leafletjs.com/) is vendored with its BSD-2-Clause `LEAFLET-LICENSE.txt`; map tiles © OpenStreetMap contributors. Public boundary geometry and weather are fetched at runtime, not bundled in the repository. Provider availability, boundary vintage, coarse grid resolution and siting constraints all limit interpretation. Real electricity-distribution mapping requires a separate, permissioned utility/grid dataset.
 
 ---
 

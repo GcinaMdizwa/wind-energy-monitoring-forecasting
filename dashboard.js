@@ -183,6 +183,7 @@ function setMap() {
     `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat}%2C${lon}`;
   $("open-map").href =
     `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=10/${lat}/${lon}`;
+  loadSpatial();
 }
 async function selectLocation(place) {
   state.location = place;
@@ -251,6 +252,7 @@ $("coordinates-form").onsubmit = (e) => {
 $("capacity").onchange = () => {
   state.capacity = Number($("capacity").value);
   loadWeather();
+  loadSpatial();
 };
 $("refresh-weather").onclick = () => loadWeather();
 async function loadWeather() {
@@ -665,8 +667,8 @@ $("run-prediction").onclick = async () => {
   }
 };
 setInterval(() => {
-  if (!$("workspace").hidden && state.view === "overview") loadWeather();
+  if (!$("workspace").hidden && state.view === "overview") {
+    loadWeather();
+    loadSpatial();
+  }
 }, 600000);
-api("/api/session")
-  .then(enter)
-  .catch(() => {});
