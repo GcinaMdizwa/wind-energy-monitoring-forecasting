@@ -104,7 +104,6 @@ The CHPC primary-author record lists the following people (duplicate entries rem
 - Sinethemba Funani
 - Gbenga Abayomi Afuye
 
-The event page names Phila Sibandze and Kgabo Humphrey Thamaga as speakers. The attached proposal names Phila Sibandze, Kgabo Humphrey Thamaga and Gbenga Afuye as lecturers. This repository credits the full listed author team without attributing identical speaking or coding roles to every person.
 
 ## Original code and future additions
 
