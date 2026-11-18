@@ -100,7 +100,7 @@ The contribution appears on the 2025 event site, while its attached workshop pro
 
 ## Collaborative credit
 
-This was team work. The CHPC primary-author record lists the following people (duplicates removed, original order kept):
+This was teamwork. The primary author lists the following people :
 
 - Onesimo Madikizela
 - Aphelele Khalakahla
@@ -111,24 +111,6 @@ This was team work. The CHPC primary-author record lists the following people (d
 - Gcina Mdizwa
 - Sinethemba Funani
 - Gbenga Abayomi Afuye
-
-## Original code and what comes next
-
-I searched my personal Colab account and found `Untitled18.ipynb` (nine cells) and `Untitled19.ipynb` (two cells). The first has an incomplete wind-siting cell plus mostly housing-site experiments; the second has mapping and housing-site code. Neither is the original time-series wind-power forecasting implementation, and a search for `LSTM` returned no notebooks. That was a limited search, so the original notebook may still exist somewhere else.
-
-I've kept those notebooks out of this public repository. The wind cell has an incomplete feature-stack expression, undefined inputs, a missing saved-model dependency, and fits its scaler at inference time, so I can't treat it as a reproduced forecasting result. I'm also not republishing the unrelated cells, private asset paths or notebook outputs.
-
-`wind_forecast.py`, its tests and the example notebook are new work I prepared for my portfolio with AI assistance in November 2026. I credit the original workshop team for the research context, but I don't attribute this new baseline code to them.
-
-As this repository grows, I'll keep original notebooks, newly written examples and reproduced results clearly separate, and I'll always keep the original author credit. Before publishing anything, I'll check it for private paths, project identifiers, credentials, personal information and restricted assets.
-
-## My next priorities
-
-1. Find the original workshop forecasting notebook and trained model, if they still exist.
-2. Confirm data provenance, contributor attribution and reuse terms before importing any original material.
-3. Evaluate the models on real observations, with multiple walk-forward test periods and a separate validation strategy for model selection.
-4. Add proper forecast uncertainty and turbine operating checks.
-5. Connect a live data feed only once I know its source, latency, access terms and monitoring requirements.
 
 ## Licence
 
