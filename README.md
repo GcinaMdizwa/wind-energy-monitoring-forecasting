@@ -2,7 +2,7 @@
 
 This project started with a CHPC workshop contribution I co-authored with colleagues: *A near real-time spatial monitoring and forecasting of wind energy using geospatial big data*. I wanted a working tool I could explore myself, so I built **WindScope**, a local dashboard that runs on my own machine. I can search any place in South Africa (or a point offshore), see modelled 100 m wind and illustrative turbine power, map wind-power potential across municipalities and provinces, and train my own RNN, LSTM or hybrid models on years of ERA5 history.
 
-It's a research and learning tool, not an operational forecasting system. I've tried to be clear throughout about what the data and models can and can't tell us. I wrote the new code with AI assistance. It is not the recovered CHPC implementation, and I credit the full workshop team for the original research (see [Collaborative credit](#collaborative-credit)).
+It's a research and learning tool, not an operational forecasting system. I've tried to be clear throughout about what the data and models can and can't tell us. I wrote the new code with AI assistance. The research idea comes from a team effort, and I credit everyone who contributed (see [Collaborative credit](#collaborative-credit)).
 
 ## WindScope — my local dashboard
 
@@ -65,7 +65,7 @@ The mapping UI is in `spatial_map.js`, and the geometry and sampling tests are i
 
 ## The earlier Random Forest baseline
 
-Before WindScope, I prepared this repository for my personal geospatial portfolio with a simpler educational example: a Python baseline for short-term turbine-power forecasting. It is not the original CHPC implementation or an operational near-real-time system. The included demo uses synthetic data, so it does not reproduce any CHPC scientific result.
+Before WindScope, I prepared this repository for my personal geospatial portfolio with a simpler educational example: a Python baseline for short-term turbine-power forecasting. The included demo uses synthetic data so anyone can run it straight away.
 
 ### Running the example
 
@@ -96,11 +96,11 @@ The CHPC contribution is titled **A near real-time spatial monitoring and foreca
 - [CHPC contribution and author record](https://events.chpc.ac.za/event/155/contributions/2684/)
 - [CHPC 2024 workshop timetable](https://events.chpc.ac.za/event/139/timetable/?view=indico_weeks_view)
 
-The contribution appears on the 2025 event site, while its attached workshop proposal refers to the 2024 meeting. I've cited both as I found them; I haven't yet confirmed which year I presented. The public materials describe the proposed approach, not a reproduced performance result.
+The idea behind the work was to bring together geospatial big data, weather data and deep learning so that wind energy can be monitored across space and forecast in near real time, supporting better planning for renewable energy in South Africa.
 
 ## Collaborative credit
 
-This was teamwork. The primary author lists the following people :
+This was team work. The people who contributed to the CHPC workshop project are:
 
 - Onesimo Madikizela
 - Aphelele Khalakahla
@@ -112,6 +112,16 @@ This was teamwork. The primary author lists the following people :
 - Sinethemba Funani
 - Gbenga Abayomi Afuye
 
+## About the code
+
+The WindScope dashboard, `wind_forecast.py`, the tests and the example notebook are work I built for my portfolio with AI assistance in November 2026, inspired by the workshop project above.
+
+## My next priorities
+
+1. Evaluate the models on real observations, with multiple walk-forward test periods and a separate validation strategy for model selection.
+2. Add proper forecast uncertainty and turbine operating checks.
+3. Connect a live data feed only once I know its source, latency, access terms and monitoring requirements.
+
 ## Licence
 
-I'm not granting a licence for the collaborative workshop materials or the recovered notebooks at this stage. Linking to the public CHPC record does not transfer ownership or give permission to relicense other contributors' code or datasets.
+I'm not granting a licence for the collaborative workshop materials at this stage. Linking to the public CHPC record does not transfer ownership or give permission to relicense other contributors' code or datasets.
