@@ -1749,3 +1749,18 @@ select:focus-visible {
     width: 100%;
   }
 }
+.spatial-toolbar input {
+  display: block;
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid #dce6d2;
+  background: #f5f8f0;
+  color: #375c49;
+  border-radius: 6px;
+  font-size: 11px;
+  min-height: 36px;
+  max-width: 155px;
+}
+.spatial-toolbar select {
+  min-height: 36px;
+}

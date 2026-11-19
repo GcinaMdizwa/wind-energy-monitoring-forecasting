@@ -10,6 +10,7 @@ import sqlite3
 import threading
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
@@ -17,6 +18,7 @@ import uvicorn
 
 import wind_data
 import spatial_power
+import era5_layer
 
 ROOT = Path(__file__).resolve().parent
 STATE = Path(os.environ.get('WINDSCOPE_STATE', ROOT/'local_state'))
@@ -25,6 +27,8 @@ DB = STATE/'workspace.sqlite'
 app = FastAPI(docs_url=None, redoc_url=None)
 sessions, jobs, attempts = {}, {}, {}
 training_lock = threading.Lock()
+era5_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix='era5-layer')
+era5_jobs = {}
 
 
 def connection():
@@ -121,6 +125,58 @@ def spatial_distribution(request: Request, lat: float, lon: float, level: str = 
         raise HTTPException(400, str(e))
     except Exception:
         raise HTTPException(502, 'Boundary or weather service unavailable. Please retry; no substitute boundary or synthetic surface is used.')
+
+
+@app.post('/api/era5-layer')
+async def start_era5(request: Request):
+    u=user(request)
+    body=await request.json()
+    try:
+        lat,lon=wind_data.coordinates(body.get('lat'),body.get('lon'))
+        rated=float(body.get('rated_kw',2000))
+        level=body.get('level','municipality')
+        start,end=body.get('start'),body.get('end')
+        hour=body.get('hour')
+        era5_layer.period(start,end,hour)
+        if level not in ('municipality','province') or not 1 <= rated <= 20000:
+            raise ValueError('Choose a valid area level and turbine capacity.')
+    except (TypeError,ValueError) as e:
+        raise HTTPException(400,str(e))
+    signature=(u['id'],round(lat,5),round(lon,5),level,start,end,hour,rated)
+    for j in era5_jobs.values():
+        if j['signature']==signature and j['state']!='failed':
+            return {'job':{k:v for k,v in j.items() if k not in ('signature','owner','result')}}
+    if sum(j['state'] in ('queued','running') for j in era5_jobs.values())>=4:
+        raise HTTPException(409,'ERA5 requests are busy. Wait for current layers to finish.')
+    # Bound in-memory result retention; source cache remains local on disk.
+    if len(era5_jobs)>=24:
+        for old in list(era5_jobs):
+            if era5_jobs[old]['state'] not in ('queued','running'):
+                era5_jobs.pop(old)
+                break
+    jid=uuid.uuid4().hex
+    j={'id':jid,'owner':u['id'],'signature':signature,'state':'queued',
+       'stage':'Queued for ERA5 archive','completed':0,'total':0}
+    era5_jobs[jid]=j
+    def worker():
+        j.update(state='running')
+        try:
+            result=era5_layer.layer(lat,lon,level,start,end,rated,STATE/'era5_cache',hour,
+                                    progress=lambda **kw:j.update(kw))
+            j.update(state='complete',stage='ERA5 layer ready',result=result)
+        except Exception as e:
+            j.update(state='failed',stage='ERA5 layer unavailable',error=str(e)[:300])
+    era5_executor.submit(worker)
+    return {'job':{k:v for k,v in j.items() if k not in ('signature','owner','result')}}
+
+
+@app.get('/api/era5-layer/{jid}')
+def get_era5(jid: str,request: Request):
+    u=user(request)
+    j=era5_jobs.get(jid)
+    if not j or j['owner']!=u['id']:
+        raise HTTPException(404,'ERA5 layer job not found in this workspace.')
+    return {'job':{k:v for k,v in j.items() if k not in ('signature','owner')}}
 
 
 @app.get('/api/session')

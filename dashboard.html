@@ -384,10 +384,10 @@
                   <span class="step-number"
                     >A WIDER VIEW OF YOUR STUDY AREA</span
                   >
-                  <h2>Spatial wind-power potential</h2>
+                  <h2>ERA5 wind & power layer</h2>
                   <p>
-                    Compare an identical illustrative turbine at sampled
-                    locations within an administrative boundary.
+                    Historical 100 m wind on the ERA5 0.25° grid, clipped to
+                    your municipality or province.
                   </p>
                 </div>
                 <button
@@ -406,15 +406,32 @@
                   </select></label
                 >
                 <label
-                  >Weather valid time<select id="spatial-hour">
-                    <option value="0">Current modelled hour</option>
-                    <option value="6">6 hours ahead</option>
-                    <option value="12">12 hours ahead</option>
-                    <option value="24">24 hours ahead</option>
+                  >Period<select id="era5-period">
+                    <option value="hour">Selected hour (UTC)</option>
+                    <option value="day">Daily average</option>
+                    <option value="month" selected>Monthly average</option>
+                    <option value="year">Annual average</option>
+                    <option value="custom">Custom period average</option>
+                  </select></label
+                >
+                <label
+                  ><span id="era5-date-label">Month</span
+                  ><input id="era5-date" type="month" required
+                /></label>
+                <label id="era5-end-label" hidden
+                  >End date<input id="era5-end" type="date" required
+                /></label>
+                <label id="era5-hour-label" hidden
+                  >UTC hour<select id="era5-hour"></select
+                ></label>
+                <label
+                  >Display<select id="era5-metric">
+                    <option value="wind_speed_mps">Wind speed · m/s</option>
+                    <option value="power_kw">Estimated power · kW</option>
                   </select></label
                 >
                 <button class="button dark small" id="refresh-spatial">
-                  Update area map ↗
+                  Load ERA5 layer ↗
                 </button>
                 <span id="spatial-status" role="status"
                   >Identifying the containing boundary…</span
@@ -423,55 +440,45 @@
               <div class="spatial-area-line">
                 <h3 id="spatial-area-name">Selected administrative area</h3>
                 <span id="spatial-time"
-                  >All samples use one common UTC timestamp.</span
+                  >Choose a date or averaging period.</span
                 >
               </div>
               <div class="spatial-summary">
                 <div>
-                  <span>SAMPLE MEAN</span><b id="spatial-mean">—</b
-                  ><small>kW per illustrative turbine</small>
+                  <span>AREA-WEIGHTED MEAN</span><b id="spatial-mean">—</b
+                  ><small id="spatial-mean-unit">m/s · 100 m wind</small>
                 </div>
                 <div>
-                  <span>SAMPLE RANGE</span><b id="spatial-range">—</b
-                  ><small>kW per illustrative turbine</small>
+                  <span>CELL RANGE</span><b id="spatial-range">—</b
+                  ><small id="spatial-range-unit">m/s · 100 m wind</small>
                 </div>
                 <div>
-                  <span>VALID POINTS</span><b id="spatial-count">—</b
-                  ><small id="spatial-grid-count">weather-grid points</small>
+                  <span>VALID CELLS</span><b id="spatial-count">—</b
+                  ><small id="spatial-grid-count">ERA5 cells</small>
                 </div>
                 <div>
-                  <span>SAMPLE SPACING</span><b id="spatial-spacing">—</b
-                  ><small>km in an equal-area projection</small>
+                  <span>ERA5 RESOLUTION</span><b id="spatial-spacing">0.25°</b
+                  ><small>approximately 25 km · no interpolation</small>
                 </div>
               </div>
               <div
                 id="spatial-map"
                 role="region"
-                aria-label="Administrative area and sampled wind-power potential map"
+                aria-label="ERA5 gridded wind speed and estimated power within administrative area"
               ></div>
-              <div class="spatial-legend">
-                <span>Estimated output / rated turbine capacity</span
-                ><i class="scale-low"></i><span>0%</span
-                ><i class="scale-mid"></i><span>50%</span
-                ><i class="scale-high"></i><span>100%</span
-                ><small
-                  >Circles show point estimates; no interpolation between
-                  points.</small
-                >
-              </div>
+              <div class="spatial-legend" id="era5-legend"></div>
               <p id="spatial-note" class="muted small-text">
-                Identical hypothetical turbines at each point. Values are not
-                installed generation, electricity supply or a
-                municipal/provincial power total. Ward-level mapping is not
-                included in this version.
+                ERA5 reanalysis, not real-time measurements. Power is an
+                illustrative turbine estimate. Grid cells are clipped for
+                display; borders do not create additional spatial detail.
               </p>
               <details class="sample-details">
-                <summary>Inspect sampled locations and data sources</summary>
+                <summary>Inspect ERA5 grid cells and data sources</summary>
                 <div class="sample-table-wrap">
                   <table class="sample-table">
                     <thead>
                       <tr>
-                        <th>Point</th>
+                        <th>Cell</th>
                         <th>Latitude</th>
                         <th>Longitude</th>
                         <th>Wind (m/s)</th>

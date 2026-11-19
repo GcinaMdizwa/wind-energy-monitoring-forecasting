@@ -669,6 +669,5 @@ $("run-prediction").onclick = async () => {
 setInterval(() => {
   if (!$("workspace").hidden && state.view === "overview") {
     loadWeather();
-    loadSpatial();
   }
 }, 600000);
